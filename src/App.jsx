@@ -134,33 +134,61 @@ function CountUp({ to, prefix="", suffix="", dur=2000 }) {
 ═══════════════════════════════════════════════════════════════ */
 function Nav({ page, setPage }) {
   const [stuck, setStuck] = useState(false);
+  const [open, setOpen] = useState(false);
+
   useEffect(() => {
     const fn = () => setStuck(window.scrollY > 36);
     window.addEventListener("scroll", fn);
     return () => window.removeEventListener("scroll", fn);
   }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
+  const navigate = (p) => { setOpen(false); setPage(p); window.scrollTo(0,0); };
   const links = ["Home","Services","About","Careers","Contact"];
+
   return (
-   <nav className={`nav${stuck?" stuck":""}`}>
-    <div className="nav-inner">
-      <div className="nav-logo" onClick={() => setPage("home")}>
-        LeadGen<span className="nav-logo-dot">.</span>B2B
-      </div>
-      <ul className="nav-links">
-        {links.map(l => (
-          <li key={l}>
-            <button className={`nav-link${page===l.toLowerCase()?" active":""}`}
-              onClick={() => { setPage(l.toLowerCase()); window.scrollTo(0,0); }}>
-              {l}
-            </button>
-          </li>
+    <>
+      <nav className={`nav${stuck?" stuck":""}`}>
+        <div className="nav-inner">
+          <div className="nav-logo" onClick={() => navigate("home")}>
+            LeadGen<span className="nav-logo-dot">.</span>B2B
+          </div>
+          <ul className="nav-links">
+            {links.map(l => (
+              <li key={l}>
+                <button className={`nav-link${page===l.toLowerCase()?" active":""}`}
+                  onClick={() => navigate(l.toLowerCase())}>{l}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button className="nav-cta" onClick={() => navigate("get-started")}>
+            Get Started →
+          </button>
+          <button className={`mob-menu-btn${open?" open":""}`} onClick={() => setOpen(!open)} aria-label="Menu">
+            <span/><span/><span/>
+          </button>
+        </div>
+      </nav>
+      <div className={`mob-nav${open?" open":""}`}>
+        {links.map((l,i) => (
+          <button key={l}
+            className={`mob-nav-link${page===l.toLowerCase()?" active":""}`}
+            onClick={() => navigate(l.toLowerCase())}
+            style={{transitionDelay: open?`${i*0.06}s`:"0s"}}>
+            {l}
+          </button>
         ))}
-      </ul>
-      <button className="nav-cta" onClick={() => { setPage("get-started"); window.scrollTo(0,0); }}>
-        Get Started →
-      </button>
+        <button className="mob-nav-cta" onClick={() => navigate("get-started")}>
+          Get Started →
+        </button>
+        <div className="mob-nav-footer">© 2026 LeadGen B2B</div>
       </div>
-    </nav>
+    </>
   );
 }
 
@@ -267,7 +295,10 @@ function CompareTable() {
     return <span className={`txt${isA?" a":""}`}>{v}</span>;
   }
   return (
-    <table className="cmp-table">
+    <>
+      <div className="cmp-scroll-hint">← Scroll to compare →</div>
+      <div className="cmp-table-wrap">
+      <table className="cmp-table">
       <thead>
         <tr>
           <th>Feature</th>
@@ -286,7 +317,9 @@ function CompareTable() {
           </tr>
         ))}
       </tbody>
-    </table>
+      </table>
+      </div>
+    </>
   );
 }
 
